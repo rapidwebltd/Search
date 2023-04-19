@@ -76,6 +76,57 @@ object(RapidWeb\Search\SearchResults)#731 (5) {
   float(0.33661985397339)
 }
 ```
+### Using operators in conditions
+
+Basic extra search conditions
+
+Operators that can be used: **==**, **!=**, **<**, **>**, **<=**, **>=**, **in**, **!in**, **email**, **!email**
+```php
+    // Operators can be used when filter Enabled
+    ->enableFilter()
+```
+Unique Key/FieldName can only be used ones!
+```php
+    // Row with id = 50 will be selected, because it is the last (id) condition
+    ->enableFilter()
+    ->setConditions([
+            'product_live' => 1,
+            'id:==' => 16,
+            'id:==' => 50
+        ]);
+````
+Some condition examples
+```php
+    // count larger than 500
+    // created (timestamp) smaller or equal 
+    ->enableFilter()
+    ->setConditions([
+            'product_live' => 1,
+            'count:>' => 500,
+            'created:<=' => 1581828542
+        ]);
+
+    // parent_id 17, 16 or 19
+    ->enableFilter()
+    ->setConditions([
+            'product_live' => 1,
+            'parent_id:in' => '17,16,9'
+        ]);
+
+    // parent_id not 35, 45 or 89
+    ->enableFilter()
+    ->setConditions([
+            'product_live' => 1,
+            'id:!in' => '34,45,89'
+        ]);
+
+    // Select invalid emailaddresses
+    ->enableFilter()
+    ->setConditions([
+            'emailaddress:!email' => ''
+        ]);
+````
+
 
 ### Caching Source Data
 
