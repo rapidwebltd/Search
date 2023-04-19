@@ -12,6 +12,9 @@ use Psr\Cache\CacheItemPoolInterface;
 
 class Search {
 
+    use SearchExtendConditions;
+
+    private $useFilter = false;
     private $pdo;
     private $table;
     private $primaryKey;
@@ -45,6 +48,11 @@ class Search {
         return $this;
     }
 
+    public function enableFilter() {
+        $this->useFilter = true;
+        return $this;
+    }
+
     public function setCache(CacheItemPoolInterface $cacheItemPool, $cacheExpiresAfter = 60*60*24) {
         $this->cacheItemPool = $cacheItemPool;
         $this->cacheExpiresAfter = $cacheExpiresAfter;
@@ -68,9 +76,16 @@ class Search {
             $this->fields[] = $this->primaryKey;
         }
 
-        foreach($this->conditions as $fieldName => $value) {
-            if (!in_array($fieldName, $this->fields)) {
-                $this->fields[] = $fieldName;
+        if($this->useFilter && method_exists($this, 'setFields')) {
+            // Call method from SearchFilter Trait
+            $this->setFields();
+        }
+        else {
+            // Handling without SearchFilter
+            foreach($this->conditions as $fieldName => $value) {
+                if (!in_array($fieldName, $this->fields)) {
+                    $this->fields[] = $fieldName;
+                }
             }
         }
     }
@@ -120,10 +135,19 @@ class Search {
 
         $migrator->setDataRowManipulator(function($dataRow) use ($terms, &$results) {
 
-            foreach($this->conditions as $fieldName => $value) {
-                $dataItem = $dataRow->getDataItemByFieldName($fieldName);
-                if ($dataItem->value != $value) {
+            if($this->useFilter && method_exists($this, 'setDataItems')) {
+                // Call method from SearchFilter Trait
+                if (!$this->setDataItems($dataRow)) {
                     return;
+                }
+            }
+            else {
+                // Handling without SearchFilter
+                foreach($this->conditions as $fieldName => $value) {
+                    $dataItem = $dataRow->getDataItemByFieldName($fieldName);
+                    if ($dataItem->value != $value) {
+                        return;
+                    }
                 }
             }
 
