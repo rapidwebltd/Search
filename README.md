@@ -100,3 +100,4 @@ $search->setDatabaseConnection($pdo)
        ->setFieldsToSearch(['product_name'])
        ->setCache($cacheItemPool, $cacheExpiryInSeconds); // Setup cache
 ```
+> **Archived package:** This package depends on the retired Rapid Web UXDM package and is no longer maintained. Its maintained successor is [`jord-jd/omega-search`](https://github.com/Jord-JD/omega-search); review that package's API before migrating because it is not guaranteed to be a drop-in replacement.
